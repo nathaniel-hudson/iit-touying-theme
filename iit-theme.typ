@@ -107,13 +107,6 @@
   let height = self.page.at("height", default: 143mm)
   let margin = self.page.at("margin")
 
-  self = utils.merge-dicts(
-    self,
-    config-page(
-      footer: my-footer,
-    ),
-  )
-
   let body = {
     // Title Block
     place(
@@ -190,13 +183,6 @@
 
 #let new-section-slide(self: none, body) = touying-slide-wrapper(self => {
 
-  self = utils.merge-dicts(
-    self,
-    config-page(
-      footer: my-footer,
-    ),
-  )
-
   let width = self.page.at("width", default: 254mm)   // 254mm = default Touying slide width
   let height = self.page.at("height", default: 143mm)
   let margin = self.page.at("margin")
@@ -248,13 +234,7 @@
   let height = self.page.at("height", default: 143mm)
   let margin = self.page.at("margin")
   
-  self = utils.merge-dicts(
-    self,
-    config-page(
-      fill: self.colors.primary,
-      footer: my-footer,
-    ),
-  )
+  self = utils.merge-dicts(self, config-page(fill: self.colors.primary))
 
   set text(fill: self.colors.neutral-lightest, size: 2em, weight: "bold", font: serif-font)
   touying-slide(
@@ -293,7 +273,7 @@
   show: touying-slides.with(
     config-page(
       paper: "presentation-" + aspect-ratio,
-      // footer: my-footer,
+      footer: my-footer,
       // footer-style: (self) => (height: 1.5em),  // give footer room for bar
     ),
     config-common(

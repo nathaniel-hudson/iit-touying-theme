@@ -49,7 +49,7 @@
 
 // ========================================================================= //
 
-#let slide(title: auto, ..args) = touying-slide-wrapper(self => {
+#let slide(show_section_in_slide_titles: false, title: auto, ..args) = touying-slide-wrapper(self => {
 
   let width = self.page.at("width", default: 254mm)   // 254mm = default Touying slide width
   let height = self.page.at("height", default: 143mm)
@@ -59,39 +59,46 @@
     self.store.title = title
   }
   
-  let header(self) = {
-    set align(top)
-    show: components.cell.with(fill: self.colors.primary, inset: 1em)
-    set align(horizon)
-    set text(
-      font: serif-font,
-      fill: self.colors.neutral-lightest, 
-      weight: "bold",
-      size: 1.25em,
-    )
-    set text()
-    if self.store.title != none {
-      utils.call-or-display(self, self.store.title)
-    } else {
-      utils.display-current-heading(level: 2)
+  if title != none {
+    let header(self) = {
+      set align(top)
+      show: components.cell.with(fill: self.colors.primary, inset: 1em)
+      set align(horizon)
+      set text(
+        font: serif-font,
+        fill: self.colors.neutral-lightest, 
+        weight: "bold",
+        size: 1.25em,
+      )
+      set text()
+      if self.store.title != none {
+        utils.call-or-display(self, self.store.title)
+      } else {
+        utils.display-current-heading(level: 2)
+      }
+
+      // Only show the SECTION title in the title bar of the slide if this is desired.
+      if show_section_in_slide_titles {
+        h(1fr)
+        text(
+          font: sans-font,
+          weight: "regular",
+          size: 0.75em,
+          "(" + utils.display-current-heading(level: 1) + ")"
+        )
+      }
     }
-    h(1fr)
-    text(
-      font: sans-font,
-      weight: "regular",
-      size: 0.75em,
-      "(" + utils.display-current-heading(level: 1) + ")"
-    )
+
+    let footer = my-footer
+    self = utils.merge-dicts(
+      self,
+      config-page(
+        header: header,
+        footer: footer,
+      ),
+    ) 
   }
 
-  let footer = my-footer
-  self = utils.merge-dicts(
-    self,
-    config-page(
-      header: header,
-      footer: footer,
-    ),
-  )
 
   set par(justify: true)
 
@@ -188,6 +195,7 @@
   let margin = self.page.at("margin")
 
   let main-body = {
+
     // Visual Block
     place(
       dx: -margin.x,
@@ -196,7 +204,6 @@
         fill: self.colors.primary,
         width: (width + 2 * margin.x) / 3,
         height: (height + 2 * margin.y),
-        // inset: (x: 3em, y: 1em),
       )
     )
 
@@ -207,7 +214,6 @@
       block(
         width: (width + 2 * margin.x) / 3 * 2,
         height: (height + 2 * margin.y),
-        // stroke: 1pt,
         inset: 2em,
         align(
           left + horizon,
@@ -239,29 +245,16 @@
   set text(fill: self.colors.neutral-lightest, size: 2em, weight: "bold", font: serif-font)
   touying-slide(
     self: self,
-    align(
-      center + horizon, 
-      body
-    )
+    align(center + horizon, body)
   )
 })
-
-// ========================================================================= //
-
-// #let new-section-slide(self: none, body) = touying-slide-wrapper(self => {
-//   let main-body = {
-//     set align(center + horizon)
-//     set text(size: 2em, fill: self.colors.primary, weight: "bold", style: "italic")
-//     utils.display-current-heading(level: 1)
-//   }
-//   touying-slide(self: self, main-body)
-// })
 
 // ========================================================================= //
 
 #let iit-theme(
   aspect-ratio: "16-9",
   footer: none,
+  show_section_in_slide_titles: false,
   ..args,
   body,
 ) = {
@@ -274,13 +267,12 @@
     config-page(
       paper: "presentation-" + aspect-ratio,
       footer: my-footer,
-      // footer-style: (self) => (height: 1.5em),  // give footer room for bar
     ),
     config-common(
       default-preamble: self => {
         set align(horizon)
       },
-      slide-fn: slide,
+      slide-fn: slide.with(show_section_in_slide_titles: show_section_in_slide_titles),
       new-section-slide-fn: new-section-slide,
     ),
     config-info(

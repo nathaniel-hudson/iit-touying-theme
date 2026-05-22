@@ -3,6 +3,7 @@
 
 #show: iit-theme.with(
   aspect-ratio: "16-9", 
+  show_section_in_slide_titles: false,
   config-info(
     title: [Introduction to Object-Oriented Programming],
     subtitle: [CS XXX: Elementary Programming],
@@ -56,3 +57,13 @@ Hello, this is a function: $f(x)$.
 - #lorem(15)
 
 === #lorem(12)
+
+#slide(
+  title: none,
+  [
+    An *title-free slide* can be created by the following:
+    ```typst
+    #slide(title: none, ...)
+    ```
+  ]
+)

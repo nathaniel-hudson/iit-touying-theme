@@ -3,6 +3,41 @@
 #let serif-font = ("Source Serif 4", "Source Serif", "Georgia")
 #let sans-font = ("Source Sans Pro", "Source Sans", "Arial")
 
+// ========================================================================= //
+
+/**
+ * This function implements footer style with a PROGRESS BAR in our slides. 
+ */
+#let my-footer(self) = {
+  // Text footer content
+  place(
+    top + right, 
+    block(
+      width: 100%, height: 100%,
+      align(
+        left + horizon,
+        text(
+          size: 0.6em, 
+          fill: self.colors.primary,
+          // utils.display-current-heading(depth: 1)
+          context utils.slide-counter.display() + " / " + utils.last-slide-number
+        )
+      )
+    )
+  )
+  // Progress bar pinned to the bottom
+  place(
+    bottom, 
+    components.progress-bar(
+      height: 3pt,
+      self.colors.primary,        // filled (completed) colour
+      self.colors.primary-light,  // unfilled (remaining) colour
+    )
+  )
+}
+
+// ========================================================================= //
+
 #let slide(title: auto, ..args) = touying-slide-wrapper(self => {
   if title != auto {
     self.store.title = title
@@ -15,28 +50,24 @@
     set text(
       font: serif-font,
       fill: self.colors.neutral-lightest, 
-      size: .7em,
+      weight: "bold",
+      size: 1.25em,
     )
-    utils.display-current-heading(level: 1)
-    linebreak()
-    set text(size: 1.5em)
+    set text()
     if self.store.title != none {
       utils.call-or-display(self, self.store.title)
     } else {
       utils.display-current-heading(level: 2)
     }
-  }
-  let footer(self) = {
-    set align(bottom)
-    show: components.cell.with(
-      fill: self.colors.tertiary, 
-      inset: 0.75em,
-    )
-    set text(fill: self.colors.neutral-darkest, size: .8em)
-    utils.call-or-display(self, self.store.footer)
     h(1fr)
-    context utils.slide-counter.display() + " / " + utils.last-slide-number
+    set text(
+      font: sans-font,
+      weight: "regular",
+      size: 0.75em,
+    )
+    utils.display-current-heading(level: 1)
   }
+  let footer = my-footer
   self = utils.merge-dicts(
     self,
     config-page(
@@ -44,9 +75,10 @@
       footer: footer,
     ),
   )
-  touying-slide(self: self, ..args)
+  touying-slide(self: self, setting: body => align(horizon, body), ..args)
 })
 
+// ========================================================================= //
 
 #let title-slide(..args) = touying-slide-wrapper(self => {
   let info = self.info + args.named()
@@ -56,8 +88,6 @@
   let margin = self.page.at("margin")
 
   let body = {
-    set align(left + horizon)
-
     // Title Block
     place(
       dx: -margin.x,
@@ -82,7 +112,7 @@
 
     // Subtitle Block
     place(
-      dy: (height * 0.5) + 2em,
+      dy: (height * 0.5) + 1em,
       block(
         fill: self.colors.white,
         if info.subtitle != none { 
@@ -125,31 +155,58 @@
       )
     )
 
-    // set text(fill: self.colors.neutral-darkest)
-    // if info.subtitle != none {
-    //   block(info.subtitle)
-    // }
-    // if info.author != none {
-    //   block(info.author)
-    // }
-    // if info.date != none {
-    //   block(utils.display-info-date(self))
-    // }
-    // if info.contact != none {
-    //   block(info.contact)
-    // }
   }
   touying-slide(self: self, body)
 })
 
+// ========================================================================= //
+
 #let new-section-slide(self: none, body) = touying-slide-wrapper(self => {
+
+  let width = self.page.at("width", default: 254mm)   // 254mm = default Touying slide width
+  let height = self.page.at("height", default: 143mm)
+  let margin = self.page.at("margin")
+
   let main-body = {
-    set align(center + horizon)
-    set text(size: 2em, fill: self.colors.primary, weight: "bold", style: "italic")
-    utils.display-current-heading(level: 1)
+    // Visual Block
+    place(
+      dx: -margin.x,
+      dy: -margin.y,
+      block(
+        fill: self.colors.primary,
+        width: (width + 2 * margin.x) / 3,
+        height: (height + 2 * margin.y),
+        // inset: (x: 3em, y: 1em),
+      )
+    )
+
+    // Text Block
+    place(
+      dx: (-2 * margin.x + width) / 3 + 1em,
+      dy: -margin.y,
+      block(
+        width: (width + 2 * margin.x) / 3 * 2,
+        height: (height + 2 * margin.y),
+        // stroke: 1pt,
+        inset: 2em,
+        align(
+          left + horizon,
+          text(
+            font: serif-font,
+            fill: self.colors.primary,
+            weight: "bold",
+            size: 2em,
+            utils.display-current-heading(level: 1),
+          )
+        )
+      )
+    )
+
   }
   touying-slide(self: self, main-body)
 })
+
+// ========================================================================= //
 
 #let focus-slide(body) = touying-slide-wrapper(self => {
   self = utils.merge-dicts(
@@ -159,11 +216,28 @@
       margin: 2em,
     ),
   )
-  set text(fill: self.colors.neutral-lightest, size: 2em)
-  touying-slide(self: self, align(horizon + center, body))
+  set text(fill: self.colors.neutral-lightest, size: 2em, weight: "bold")
+  touying-slide(
+    self: self, 
+    align(
+      center + horizon, 
+      body
+    )
+  )
 })
 
+// ========================================================================= //
 
+// #let new-section-slide(self: none, body) = touying-slide-wrapper(self => {
+//   let main-body = {
+//     set align(center + horizon)
+//     set text(size: 2em, fill: self.colors.primary, weight: "bold", style: "italic")
+//     utils.display-current-heading(level: 1)
+//   }
+//   touying-slide(self: self, main-body)
+// })
+
+// ========================================================================= //
 
 #let iit-theme(
   aspect-ratio: "16-9",
@@ -177,12 +251,20 @@
   )
 
   show: touying-slides.with(
-    config-page(paper: "presentation-" + aspect-ratio),
+    config-page(
+      paper: "presentation-" + aspect-ratio,
+      // footer: my-footer,
+      // footer-style: (self) => (height: 1.5em),  // give footer room for bar
+    ),
     config-common(
+      default-preamble: self => {
+        set align(horizon)
+      },
       slide-fn: slide,
+      new-section-slide-fn: new-section-slide,
     ),
     config-info(
-      // title: ["title goes here"]
+      date: datetime.today(),
     ),
     config-methods(
       alert: utils.alert-with-primary-color,

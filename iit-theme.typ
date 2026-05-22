@@ -9,28 +9,39 @@
  * This function implements footer style with a PROGRESS BAR in our slides. 
  */
 #let my-footer(self) = {
+
+  let width = self.page.at("width", default: 254mm)   // 254mm = default Touying slide width
+  let height = self.page.at("height", default: 143mm)
+  let margin = self.page.at("margin")
+
   // Text footer content
   place(
-    top + right, 
+    right, 
+    dx: -margin.x,
     block(
-      width: 100%, height: 100%,
+      width: 100%, 
+      height: 100%,
       align(
-        left + horizon,
+        right + horizon,
         text(
-          size: 0.6em, 
-          fill: self.colors.primary,
+          size: 12pt, 
+          font: sans-font,
+          weight: "regular",
+          fill: self.colors.secondary,
           // utils.display-current-heading(depth: 1)
           context utils.slide-counter.display() + " / " + utils.last-slide-number
         )
       )
     )
   )
+
   // Progress bar pinned to the bottom
   place(
     bottom, 
+    dy: 1pt, // without this, the progress bar roughly *one* pixel above the bottom of the slide
     components.progress-bar(
       height: 3pt,
-      self.colors.primary,        // filled (completed) colour
+      self.colors.secondary,        // filled (completed) colour
       self.colors.primary-light,  // unfilled (remaining) colour
     )
   )
@@ -39,10 +50,15 @@
 // ========================================================================= //
 
 #let slide(title: auto, ..args) = touying-slide-wrapper(self => {
+
+  let width = self.page.at("width", default: 254mm)   // 254mm = default Touying slide width
+  let height = self.page.at("height", default: 143mm)
+  let margin = self.page.at("margin")
+
   if title != auto {
     self.store.title = title
   }
-  // set page
+  
   let header(self) = {
     set align(top)
     show: components.cell.with(fill: self.colors.primary, inset: 1em)
@@ -60,13 +76,14 @@
       utils.display-current-heading(level: 2)
     }
     h(1fr)
-    set text(
+    text(
       font: sans-font,
       weight: "regular",
       size: 0.75em,
+      "(" + utils.display-current-heading(level: 1) + ")"
     )
-    utils.display-current-heading(level: 1)
   }
+
   let footer = my-footer
   self = utils.merge-dicts(
     self,
@@ -75,6 +92,9 @@
       footer: footer,
     ),
   )
+
+  set par(justify: true)
+
   touying-slide(self: self, setting: body => align(horizon, body), ..args)
 })
 
@@ -86,6 +106,13 @@
   let width = self.page.at("width", default: 254mm)   // 254mm = default Touying slide width
   let height = self.page.at("height", default: 143mm)
   let margin = self.page.at("margin")
+
+  self = utils.merge-dicts(
+    self,
+    config-page(
+      footer: my-footer,
+    ),
+  )
 
   let body = {
     // Title Block
@@ -163,6 +190,13 @@
 
 #let new-section-slide(self: none, body) = touying-slide-wrapper(self => {
 
+  self = utils.merge-dicts(
+    self,
+    config-page(
+      footer: my-footer,
+    ),
+  )
+
   let width = self.page.at("width", default: 254mm)   // 254mm = default Touying slide width
   let height = self.page.at("height", default: 143mm)
   let margin = self.page.at("margin")
@@ -209,16 +243,22 @@
 // ========================================================================= //
 
 #let focus-slide(body) = touying-slide-wrapper(self => {
+
+  let width = self.page.at("width", default: 254mm)   // 254mm = default Touying slide width
+  let height = self.page.at("height", default: 143mm)
+  let margin = self.page.at("margin")
+  
   self = utils.merge-dicts(
     self,
     config-page(
       fill: self.colors.primary,
-      margin: 2em,
+      footer: my-footer,
     ),
   )
-  set text(fill: self.colors.neutral-lightest, size: 2em, weight: "bold")
+
+  set text(fill: self.colors.neutral-lightest, size: 2em, weight: "bold", font: serif-font)
   touying-slide(
-    self: self, 
+    self: self,
     align(
       center + horizon, 
       body

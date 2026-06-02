@@ -1,7 +1,39 @@
 #import "@preview/touying:0.7.3": *
 
+// Import Theorion to enable theorems and other environments:
+// https://typst.app/universe/package/theorion/
+#import "@preview/theorion:0.6.0": *
+
 #let serif-font = ("Source Serif 4", "Source Serif", "Georgia")
 #let sans-font = ("Source Sans Pro", "Source Sans", "Arial")
+#import cosmos.clouds: *
+
+// ========================================================================= //
+
+// Define custom highlighting functions.
+
+#let hl-primary(body) = touying-fn-wrapper((self: none, body) => {
+  text(fill: self.colors.primary, body)
+}, body)
+
+#let hl = hl-primary
+
+#let hl-secondary(body) = touying-fn-wrapper((self: none, body) => {
+  text(fill: self.colors.primary, body)
+}, body)
+
+#let hl-red(body) = touying-fn-wrapper((self: none, body) => {
+  text(fill: self.colors.red, body)
+}, body)
+
+#let hl-green(body) = touying-fn-wrapper((self: none, body) => {
+  text(fill: self.colors.green, body)
+}, body)
+
+#let hl-blue(body) = touying-fn-wrapper((self: none, body) => {
+  text(fill: self.colors.blue, body)
+}, body)
+
 
 // ========================================================================= //
 
@@ -49,7 +81,10 @@
 
 // ========================================================================= //
 
-#let slide(show_section_in_slide_titles: false, title: auto, ..args) = touying-slide-wrapper(self => {
+#let slide(
+    show-section-in-slide-titles: false, 
+    title: auto, ..args
+) = touying-slide-wrapper(self => {
 
   let width = self.page.at("width", default: 254mm)   // 254mm = default Touying slide width
   let height = self.page.at("height", default: 143mm)
@@ -78,7 +113,7 @@
       }
 
       // Only show the SECTION title in the title bar of the slide if this is desired.
-      if show_section_in_slide_titles {
+      if show-section-in-slide-titles {
         h(1fr)
         text(
           font: sans-font,
@@ -108,8 +143,8 @@
 // ========================================================================= //
 
 #let title-slide(..args) = touying-slide-wrapper(self => {
+  
   let info = self.info + args.named()
-
   let width = self.page.at("width", default: 254mm)   // 254mm = default Touying slide width
   let height = self.page.at("height", default: 143mm)
   let margin = self.page.at("margin")
@@ -177,7 +212,7 @@
         width: 100%,
         align(
           right,
-          image("iit_red_logo.png", height: height * 0.05),
+          image("static/iit_red_logo.png", height: height * 0.05),
         )
       )
     )
@@ -251,18 +286,25 @@
 
 // ========================================================================= //
 
+// Define the highlight helpers
+#let primary-highlight(body) = text(fill: rgb("#E63946"), weight: "bold", body)
+#let secondary-highlight(body) = text(fill: rgb("#457B9D"), style: "italic", body)
+
 #let iit-theme(
   aspect-ratio: "16-9",
   footer: none,
-  show_section_in_slide_titles: false,
+  show-section-in-slide-titles: false,
   ..args,
   body,
 ) = {
-  set text(
-    font: sans-font,
-    size: 20pt,
-  )
+  // Set defaults for text.
+  set text(font: sans-font, size: 20pt)
 
+  // Setup basic use of the Cosmos themes for Theorion.
+  show figure.where(kind: "theorem"): it => block(breakable: false, it)
+  show: show-theorion
+
+  // Define the slide styles.
   show: touying-slides.with(
     config-page(
       paper: "presentation-" + aspect-ratio,
@@ -272,14 +314,16 @@
       default-preamble: self => {
         set align(horizon)
       },
-      slide-fn: slide.with(show_section_in_slide_titles: show_section_in_slide_titles),
+      slide-fn: slide.with(
+        show-section-in-slide-titles: show-section-in-slide-titles, 
+      ),
       new-section-slide-fn: new-section-slide,
     ),
     config-info(
       date: datetime.today(),
     ),
     config-methods(
-      alert: utils.alert-with-primary-color,
+      // alert: utils.alert-with-primary-color,
     ),
     config-colors(
       primary: rgb("#CC0000"),
@@ -288,6 +332,10 @@
       black: rgb("#000000"),
       gray: rgb("#76777B"),
       white: rgb("FFFFFF"),
+      // Additional colors for highlighting.
+      red: rgb("#cc0000"),
+      green: rgb("00aa00"),
+      blue: rgb("#0066cc"),
     ),
     config-store(
       title: none,
